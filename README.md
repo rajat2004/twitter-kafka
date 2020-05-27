@@ -8,7 +8,18 @@ Prerequisites -
 
 - `Kafka`
 - `Spark`
-- Get Twitter developer account and generate keys
+- Get Twitter developer account and generate Consumer & User keys for application
+
+Create `tokens.json` file with the tokens as following -
+
+```json
+{
+    "api_key": "XXXXX",
+    "api_secret_key": "XXXXX",
+    "access_token": "XXXXX",
+    "access_token_secret": "XXXXX"
+}
+```
 
 Python Libraries used -
 
