@@ -24,3 +24,4 @@ Create `tokens.json` file with the tokens as following -
 Python Libraries used -
 
 1. `kafka-python`
+2. Tweepy
