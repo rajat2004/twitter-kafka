@@ -39,9 +39,11 @@ if __name__ == "__main__":
 
     languages = tweets_filter['languages']
 
-    for topic in tweets_filter['topics']:
-        admin_client.create_topics(new_topics=[ NewTopic(topic['name'], num_partitions=1, replication_factor=1) ])
+    new_topics = [NewTopic(topic['name'], num_partitions=1, replication_factor=1)
+                  for topic in tweets_filter['topics']]
+    admin_client.create_topics(new_topics=new_topics)
 
+    for topic in tweets_filter['topics']:
         myStreamListener = MyStreamListener(producer, topic['name'])
         myStream = tweepy.Stream(auth=auth, listener=myStreamListener)
 
