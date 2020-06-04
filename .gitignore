@@ -1,2 +1,3 @@
 .vscode/
 tokens.json
+__pycache__/
