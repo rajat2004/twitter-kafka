@@ -1,9 +1,12 @@
 import tweepy
 import json
+import logging
 from kafka import KafkaProducer
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError
 from utils import check_location
+
+log = logging.getLogger()
 
 class MyStreamListener(tweepy.StreamListener):
 
@@ -32,9 +35,10 @@ class MyStreamListener(tweepy.StreamListener):
                     break
 
             if topic_name is None:
+                log.warn(f'Topic name none for coordinates - {j["coordinates"]["coordinates"]}, returning')
                 return
 
-            print(f'{topic_name} - {j["coordinates"]["coordinates"]} - {j["text"]}')
+            log.info(f'{topic_name} - {j["coordinates"]["coordinates"]} - {j["text"]}')
             self.producer.send(topic_name, j['text'])
 
 
@@ -70,7 +74,7 @@ if __name__ == "__main__":
     try:
         admin_client.create_topics(new_topics=new_topics)
     except TopicAlreadyExistsError as e:
-        pass
+        log.warn(f'Topics already exist - {e}')
 
     # Create Stream Listener
     myStreamListener = MyStreamListener(producer, tweets_filter['topics'])
