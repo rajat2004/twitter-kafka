@@ -1,3 +1,15 @@
 .vscode/
 tokens.json
 __pycache__/
+
+# Scala, sbt
+dist/*
+target/
+project/boot/
+project/plugins/project/
+.history
+.cache
+.lib/
+
+.log
+.class
