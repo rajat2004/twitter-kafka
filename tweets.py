@@ -1,12 +1,14 @@
 import tweepy
 import json
 import logging
+import os
 from kafka import KafkaProducer
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError
 from utils import check_location
 
 log = logging.getLogger()
+logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
 class MyStreamListener(tweepy.StreamListener):
 
