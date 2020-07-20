@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+   <head>
+      <meta charset="utf-8">
+      <title>Simple Web UI</title>
+   </head>
+   <body>
+      <header>
+         <div class="container">
+            <h2 class="logo">Tweets</h1>
+            <strong>
+               <nav>
+                  <ul class="menu">
+                     <li><a href="topic/NY">NY</a></li>
+                     <li><a href="topic/CA">CA</a></li>
+                  </ul>
+               </nav>
+            </strong>
+         </div>
+      </header>
+      {% block content %}
+      {% endblock %}
+   </body>
+</html>
