@@ -1,6 +1,7 @@
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka010._
+import org.apache.spark.ml.fpm.FPGrowth
 
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -21,7 +22,8 @@ object TweetConsumer {
         val Array(brokers, groupId, topics) = args
 
         val conf = new SparkConf().setMaster("local[2]").setAppName("TweetConsumer")
-        val ssc = new StreamingContext(conf, Seconds(1))
+        // val ssc = new StreamingContext(conf, Seconds(1))
+        val ssc = new StreamingContext(conf, Minutes(1))
 
         val topicsSet = topics.split(",").toSet
         val kafkaParams = Map[String, Object](
@@ -38,10 +40,21 @@ object TweetConsumer {
         )
 
         val lines = messages.map(_.value)
-        val words = lines.flatMap(_.split(" "))
-        val pairs = words.map(word => (word, 1))
-        val wordCounts = pairs.reduceByKey(_ + _)
-        wordCounts.print()
+        lines.print()
+        println("Total lines: "  + lines.count())
+        lines.repartition(1).saveAsTextFiles("/home/rajat/Github/twitter-kafka/outputs/NY-tweets")
+//        val words = lines.flatMap(_.split(" "))
+//        val pairs = words.map(word => (word, 1))
+//        val wordCounts = pairs.reduceByKey(_ + _)
+//        wordCounts.print()
+
+        // Frequent pair
+        val fpgrowth = new FPGrowth().setMinSupport(0.1)
+        val dataset = lines.map(line => line.split(" "))
+        val model = fpgrowth.fit(dataset)
+
+        // Display frequent itemsets.
+        model.freqItemsets.show()
 
         ssc.start()             // Start the computation
         ssc.awaitTermination()

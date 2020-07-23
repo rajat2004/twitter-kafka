@@ -2,6 +2,7 @@ import tweepy
 import json
 import logging
 import os
+import argparse
 from kafka import KafkaProducer
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError
@@ -46,10 +47,13 @@ class MyStreamListener(tweepy.StreamListener):
 
 if __name__ == "__main__":
 
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
-                             value_serializer=lambda x: json.dumps(x).encode('utf-8'))
+    args_parser = argparse.ArgumentParser(description="Fetch tweets from areas and publish to Kafka topics")
 
-    admin_client = KafkaAdminClient(bootstrap_servers=['localhost:9092'], client_id="tweet_producer")
+    args_parser.add_argument('-c', '--config', action='store', type=str, required=True,
+                            help='Config file containing Kafka broker and topics for tweets')
+
+    args = args_parser.parse_args()
+    config_file = args.config
 
     # Load Twitter API access tokens
     with open("tokens.json") as f:
@@ -59,16 +63,23 @@ if __name__ == "__main__":
     auth.set_access_token(tokens['access_token'], tokens['access_token_secret'])
 
     # Load Tweet filtering data
-    with open('tweets_filter.json') as f:
-        tweets_filter = json.load(f)
+    with open(config_file) as f:
+        tweets_producer_config = json.load(f)
 
-    languages = tweets_filter['languages']
+    kafka_broker = tweets_producer_config['kafka-brokers']
+    languages = tweets_producer_config['languages']
+
+
+    producer = KafkaProducer(bootstrap_servers=[kafka_broker],
+                             value_serializer=lambda x: json.dumps(x).encode('utf-8'))
+    # For creating topics
+    admin_client = KafkaAdminClient(bootstrap_servers=[kafka_broker], client_id="tweet_producer")
 
     new_topics = []
     locations = []
 
     # Create topics & filter locations list
-    for topic in tweets_filter['topics']:
+    for topic in tweets_producer_config['topics']:
         new_topics.append(NewTopic(topic['name'], num_partitions=1, replication_factor=1))
         locations += topic['location']
 
@@ -79,7 +90,7 @@ if __name__ == "__main__":
         log.warn(f'Topics already exist - {e}')
 
     # Create Stream Listener
-    myStreamListener = MyStreamListener(producer, tweets_filter['topics'])
+    myStreamListener = MyStreamListener(producer, tweets_producer_config['topics'])
     myStream = tweepy.Stream(auth=auth, listener=myStreamListener)
 
     myStream.filter(languages=languages, locations=locations)
