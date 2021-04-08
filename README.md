@@ -7,8 +7,8 @@ Use Twitter API to fetch tweets of New York and California states, and publish t
 Prerequisites -
 
 - Java 8 - `sudo apt-get install openjdk-8-jdk`
-- [`Kafka` - 2.5.0](https://www.apache.org/dyn/closer.cgi?path=/kafka/2.5.0/kafka_2.12-2.5.0.tgz)
-- [`Spark` - 2.4.6](https://www.apache.org/dyn/closer.lua/spark/spark-2.4.6/spark-2.4.6-bin-hadoop2.7.tgz)
+- [`Kafka` - 2.5.0](https://archive.apache.org/dist/kafka/2.5.0/kafka_2.12-2.5.0.tgz)
+- [`Spark` - 2.4.6](https://archive.apache.org/dist/spark/spark-2.4.6/spark-2.4.6-bin-hadoop2.7.tgz)
 - Get Twitter developer account and generate Consumer & User keys for application
 
 Create `tokens.json` file with the tokens as following -
@@ -22,7 +22,7 @@ Create `tokens.json` file with the tokens as following -
 }
 ```
 
-Add Kafka & Spark to `.bashrc` or `.zshrc`. E.g.
+Add Kafka & Spark to `.bashrc` or `.zshrc`. E.g (paths are assumed to be at home directory below).
 
 ```shell
 # Java
@@ -62,8 +62,12 @@ Use `test_kafka_producer.py` & `test_kafka_consumer.py` to make sure that Kafka 
 
 By default, the config files are set for the local system (`localhost`), and can be easily changed to use different brokers when running on muliple machines.
 
+**NOTES**:
+
 To run without command exiting when `ssh` shell dies -
 
 ```shell
 nohup spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.6 spark_consumer.py --executor-memory 500m &
 ```
+
+You might need to add a port rule for 9092 which is used for Kafka if running on AWS or Azure. Port 5000 will also need to be exposed for Flask
